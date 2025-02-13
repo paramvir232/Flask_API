@@ -49,7 +49,22 @@ class CRUD:
             return {"id": person.id, "name": person.name, "email": person.email}
         except SQLAlchemyError as e:
             return {"message": f"Error: {str(e)}"}, 500
-
+            
+    @staticmethod
+    def update_item(id, name, email):
+        try:
+            person = API.query.filter_by(id=id).first()
+            if person is None:
+                return {"message": f"Person ID {id} does not exist!"}, 404
+            # Update the fields
+            person.name = name
+            person.email = email
+            db.session.commit()
+            return {"message": "Updated", "id": id, "name": name, "email": email}
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {"message": f"Error: {str(e)}"}, 500
+            
     @staticmethod
     def delete_item(id):
         try:
@@ -84,7 +99,7 @@ class Main(Resource):
 
     def put(self, id):
         put_args = args.parse_args()
-        result = CRUD.add_item(id, put_args['name'], put_args['email'])
+        result = CRUD.update_item(id, put_args['name'], put_args['email'])
         return jsonify(result)
 
     def delete(self, id):
