@@ -1,0 +1,103 @@
+from flask import Flask, jsonify, request, abort
+from flask_restful import Api, Resource, reqparse
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
+
+app = Flask(__name__)
+api = Api(app)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:0110@localhost/todo'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = 'your_secret_key'
+db = SQLAlchemy(app)
+
+# Define the API model using SQLAlchemy
+class API(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(50), nullable=False)
+
+    def __init__(self, id, name, email):
+        self.id = id
+        self.name = name
+        self.email = email
+
+    def __repr__(self):
+        return f"<API(id={self.id}, name={self.name}, email={self.email})>"
+
+# Customized CRUD class to handle operations
+class CRUD:
+    @staticmethod
+    def add_item(id, name, email):
+        try:
+            person = API(id=id, name=name, email=email)
+            db.session.add(person)
+            db.session.commit()
+            return {"message": "Inserted", "id": id, "name": name, "email": email}
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {"message": f"Error: {str(e)}"}, 500
+
+    @staticmethod
+    def get_item(id):
+        try:
+            person = API.query.filter_by(id=id).first()
+            if person is None:
+                return {"message": f"Person ID {id} does not exist!"}, 404
+            return {"id": person.id, "name": person.name, "email": person.email}
+        except SQLAlchemyError as e:
+            return {"message": f"Error: {str(e)}"}, 500
+
+    @staticmethod
+    def delete_item(id):
+        try:
+            person = API.query.filter_by(id=id).first()
+            if person is None:
+                return {"message": f"Person ID {id} does not exist!"}, 404
+            db.session.delete(person)
+            db.session.commit()
+            return {"message": f"Deleted person with ID {id}"}
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {"message": f"Error: {str(e)}"}, 500
+
+    @staticmethod
+    def get_all_items():
+        try:
+            people = API.query.all()
+            result = [{'id': person.id, 'name': person.name, 'email': person.email} for person in people]
+            return result
+        except SQLAlchemyError as e:
+            return {"message": f"Error: {str(e)}"}, 500
+
+# Argument parser for incoming requests
+args = reqparse.RequestParser()
+args.add_argument('name', type=str, help="name required", required=True)
+args.add_argument('email', type=str, help="email required", required=True)
+
+class Main(Resource):
+    def get(self, id):
+        result = CRUD.get_item(id)
+        return jsonify(result)
+
+    def put(self, id):
+        put_args = args.parse_args()
+        result = CRUD.add_item(id, put_args['name'], put_args['email'])
+        return jsonify(result)
+
+    def delete(self, id):
+        result = CRUD.delete_item(id)
+        return jsonify(result)
+
+# Add resource to API
+api.add_resource(Main, '/<int:id>')
+
+@app.route('/')
+def home():
+    result = CRUD.get_all_items()
+    return jsonify(result)
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
