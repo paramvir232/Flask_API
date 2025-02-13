@@ -138,7 +138,7 @@ def home():
 def post():
     # Extract data from the JSON body of the request
         data = request.get_json()
-        # id = data.get(f'{id}')
+        id = data.get('id')
         name = data.get('name')
         email = data.get('email')
         
