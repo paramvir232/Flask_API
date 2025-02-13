@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, abort
 from flask_restful import Api, Resource, reqparse
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 api = Api(app)
