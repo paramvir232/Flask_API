@@ -101,10 +101,11 @@ class Main(Resource):
         put_args = args.parse_args()
         result = CRUD.update_item(id, put_args['name'], put_args['email'])
         return jsonify(result)
-    def post(self):
+        
+    def post(self,id):
         # Extract data from the JSON body of the request
         data = request.get_json()
-        id = data.get('id')
+        # id = data.get(f'{id}')
         name = data.get('name')
         email = data.get('email')
         
@@ -118,6 +119,7 @@ class Main(Resource):
     def delete(self, id):
         result = CRUD.delete_item(id)
         return jsonify(result)
+        
 with app.app_context():
     inspector = inspect(db.engine)  # Use inspect to check the database engine
     if not inspector.has_table('api'):  # Check if 'api' table exists
