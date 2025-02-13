@@ -101,6 +101,19 @@ class Main(Resource):
         put_args = args.parse_args()
         result = CRUD.update_item(id, put_args['name'], put_args['email'])
         return jsonify(result)
+    def post(self):
+        # Extract data from the JSON body of the request
+        data = request.get_json()
+        id = data.get('id')
+        name = data.get('name')
+        email = data.get('email')
+        
+        # Check if all required fields are provided
+        if not id or not name or not email:
+            return jsonify({"message": "ID, name, and email are required!"}), 400
+
+        result = CRUD.add_item(id, name, email)
+        return jsonify(result)
 
     def delete(self, id):
         result = CRUD.delete_item(id)
