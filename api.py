@@ -89,6 +89,11 @@ class Main(Resource):
     def delete(self, id):
         result = CRUD.delete_item(id)
         return jsonify(result)
+with app.app_context():
+    if not db.engine.dialect.has_table(db.engine, 'api'):  # Check if 'api' table exists
+        db.create_all()  # Create tables if they don't exist
+    else:
+        print("Tables already exist, skipping creation.")
 
 # Add resource to API
 api.add_resource(Main, '/<int:id>')
