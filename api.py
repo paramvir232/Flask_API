@@ -133,6 +133,21 @@ api.add_resource(Main, '/<int:id>')
 def home():
     result = CRUD.get_all_items()
     return jsonify(result)
+    
+@app.route('/post',methods=['POST'])
+def post():
+    # Extract data from the JSON body of the request
+        data = request.get_json()
+        # id = data.get(f'{id}')
+        name = data.get('name')
+        email = data.get('email')
+        
+        # Check if all required fields are provided
+        if not id or not name or not email:
+            return jsonify({"message": "ID, name, and email are required!"}), 400
+
+        result = CRUD.add_item(id, name, email)
+        return jsonify(result)
 
 if __name__ == '__main__':
     with app.app_context():
