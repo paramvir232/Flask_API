@@ -4,9 +4,11 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 from flask_migrate import Migrate
 from sqlalchemy import inspect
-#Hello From Local test
+from flask_cors import CORS
+#Hello From Local
 app = Flask(__name__)
 api = Api(app)
+CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://api_1yct_user:YTnRCqigFRXkkjsZLLyQ2UqQfgjJQjG8@dpg-cumuhiggph6c738a6vpg-a/api_1yct'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
