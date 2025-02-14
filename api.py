@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 from flask_migrate import Migrate
 from sqlalchemy import inspect
-
+#Hello From Local
 app = Flask(__name__)
 api = Api(app)
 
