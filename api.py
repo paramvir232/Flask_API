@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from flask_migrate import Migrate
 from sqlalchemy import inspect
 from flask_cors import CORS
-#Hello From Local
+#Hello From Local test
 app = Flask(__name__)
 api = Api(app)
 CORS(app)
