@@ -149,6 +149,24 @@ def post():
         result = CRUD.add_item(id, name, email)
         return jsonify(result)
 
+@app.route('/put',methods=['PUT'])
+def put():
+    data = request.get_json()
+    id = data.get('id')
+    put_args = args.parse_args()
+    result = CRUD.update_item(id, put_args['name'], put_args['email'])
+    return jsonify(result)
+
+@app.route('/delete/<int:id>',methods=['DELETE'])
+def delete(id):
+    result = CRUD.delete_item(id)
+    return jsonify(result)
+
+@app.route('/get/<int:id>',methods=['GET'])
+def get(id):
+    result = CRUD.get_item(id)
+    return jsonify(result)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
