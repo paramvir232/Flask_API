@@ -171,7 +171,7 @@ with app.app_context():
     else:
         print("Tables already exist, skipping creation.")
 # Add resource to API
-# api.add_resource(Main, '/delete/<int:id>')
+api.add_resource(Main, '/get/<int:id>')
 
 @app.route('/')
 def home():
@@ -209,11 +209,11 @@ def delete(current_user,id):
     result = CRUD.delete_item(id)
     return jsonify(result)
 
-@app.route('/get/<int:id>',methods=['GET'])
-@token_required
-def get(current_user,id):
-    result = CRUD.get_item(id)
-    return jsonify(result)
+# @app.route('/get/<int:id>',methods=['GET'])
+# @token_required
+# def get(current_user,id):
+#     result = CRUD.get_item(id)
+#     return jsonify(result)
 
 
 @app.route('/login', methods=['POST'])
