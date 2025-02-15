@@ -178,8 +178,8 @@ def home():
     result = CRUD.get_all_items()
     return jsonify(result)
 
-@token_required
 @app.route('/post',methods=['POST'])
+@token_required
 def post():
     # Extract data from the JSON body of the request
         data = request.get_json()
@@ -194,8 +194,8 @@ def post():
         result = CRUD.add_item(id, name, email)
         return jsonify(result)
 
-@token_required
 @app.route('/put',methods=['PUT'])
+@token_required
 def put():
     data = request.get_json()
     id = data.get('id')
@@ -203,14 +203,14 @@ def put():
     result = CRUD.update_item(id, put_args['name'], put_args['email'])
     return jsonify(result)
 
-@token_required
 @app.route('/delete/<int:id>',methods=['DELETE'])
+@token_required
 def delete(id):
     result = CRUD.delete_item(id)
     return jsonify(result)
 
-@token_required
 @app.route('/get/<int:id>',methods=['GET'])
+@token_required
 def get(id):
     result = CRUD.get_item(id)
     return jsonify(result)
