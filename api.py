@@ -15,7 +15,7 @@ CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://api_1yct_user:YTnRCqigFRXkkjsZLLyQ2UqQfgjJQjG8@dpg-cumuhiggph6c738a6vpg-a/api_1yct'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = 'your_secret_key'
+app.config['SECRET_KEY'] = 'your_secret_key'
 db = SQLAlchemy(app)
 
 def generate_token(username):
@@ -171,7 +171,7 @@ with app.app_context():
     else:
         print("Tables already exist, skipping creation.")
 # Add resource to API
-api.add_resource(Main, '/<int:id>')
+# api.add_resource(Main, '/delete/<int:id>')
 
 @app.route('/')
 def home():
@@ -180,7 +180,7 @@ def home():
 
 @app.route('/post',methods=['POST'])
 @token_required
-def post():
+def post(current_user):
     # Extract data from the JSON body of the request
         data = request.get_json()
         id = data.get('id')
@@ -196,7 +196,7 @@ def post():
 
 @app.route('/put',methods=['PUT'])
 @token_required
-def put():
+def put(current_user):
     data = request.get_json()
     id = data.get('id')
     put_args = args.parse_args()
@@ -205,13 +205,13 @@ def put():
 
 @app.route('/delete/<int:id>',methods=['DELETE'])
 @token_required
-def delete(id):
+def delete(current_user,id):
     result = CRUD.delete_item(id)
     return jsonify(result)
 
 @app.route('/get/<int:id>',methods=['GET'])
 @token_required
-def get(id):
+def get(current_user,id):
     result = CRUD.get_item(id)
     return jsonify(result)
 
@@ -240,6 +240,6 @@ def protected(current_user):
 
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
     app.run(debug=True)
