@@ -5,6 +5,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from flask_migrate import Migrate
 from sqlalchemy import inspect
 from flask_cors import CORS
+import jwt
+import datetime
+from functools import wraps
 #Hello From Local test
 app = Flask(__name__)
 api = Api(app)
@@ -14,6 +17,45 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://api_1yct_user:YTnRCqigFRXk
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'your_secret_key'
 db = SQLAlchemy(app)
+
+def generate_token(username):
+    # Create a token with a payload that includes the username and an expiration time
+    payload = {
+        'user': username,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # Token expires in 1 hour
+    }
+    token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+    return token
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        # Expect the token in the Authorization header in the format "Bearer <token>"
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            parts = auth_header.split()
+            if len(parts) == 2 and parts[0].lower() == 'bearer':
+                token = parts[1]
+        
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        
+        try:
+            # Decode the token to retrieve the payload
+            payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = payload['user']
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired!'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'message': 'Invalid token!'}), 401
+        
+        return f(current_user, *args, **kwargs)
+    return decorated
+
+
+
 
 # Define the API model using SQLAlchemy
 class API(db.Model):
@@ -168,6 +210,30 @@ def delete(id):
 def get(id):
     result = CRUD.get_item(id)
     return jsonify(result)
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    # For demonstration, we assume a JSON payload with username and password.
+    # In a real app, verify credentials against a user database.
+    auth_data = request.get_json()
+    username = auth_data.get('username')
+    password = auth_data.get('password')
+
+    # Replace this with proper authentication logic
+    if username == 'admin' and password == 'password':
+        token = generate_token(username)
+        return jsonify({'token': token})
+    
+    return jsonify({'message': 'Invalid credentials'}), 401
+
+
+@app.route('/protected', methods=['GET'])
+@token_required
+def protected(current_user):
+    return jsonify({'message': f'Hello, {current_user}! This is a protected endpoint.'})
+
+
 
 if __name__ == '__main__':
     with app.app_context():
